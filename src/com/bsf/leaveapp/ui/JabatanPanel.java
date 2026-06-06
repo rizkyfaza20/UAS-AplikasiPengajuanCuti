@@ -23,84 +23,58 @@ public class JabatanPanel extends JPanel {
 
     public JabatanPanel(String userRole) {
         this.userRole = userRole;
-        setLayout(new BorderLayout(15, 15));
-        setBackground(new Color(30, 30, 30));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Heading title
         JLabel lblTitle = new JLabel("Manajemen Data Jabatan & Departemen");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 14f));
         add(lblTitle, BorderLayout.NORTH);
 
-        // Main Table layout
         tableModel = new DefaultTableModel(new Object[]{"Kode Jabatan", "Nama Jabatan", "Departemen"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         table = new JTable(tableModel);
         table.setFillsViewportHeight(true);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // Sidebar input form layout
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setBackground(new Color(43, 43, 43));
+        // Form panel
+        JPanel formPanel = new JPanel(new BorderLayout(5, 10));
         formPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(60, 60, 60)),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+                BorderFactory.createTitledBorder("Form Data Jabatan"),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        formPanel.setPreferredSize(new Dimension(300, 0));
+        formPanel.setPreferredSize(new Dimension(270, 0));
 
-        JLabel lblFormTitle = new JLabel("Form Data Jabatan");
-        lblFormTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblFormTitle.setForeground(Color.WHITE);
-        lblFormTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-        formPanel.add(lblFormTitle);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        JPanel fields = new JPanel(new GridLayout(6, 1, 5, 5));
 
+        fields.add(new JLabel("Kode Jabatan:"));
         txtKdJabatan = new JTextField();
         txtKdJabatan.setEditable(false);
-        txtKdJabatan.setMaximumSize(new Dimension(270, 30));
-        txtKdJabatan.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(txtKdJabatan);
 
+        fields.add(new JLabel("Nama Jabatan:"));
         txtNamaJabatan = new JTextField();
-        txtNamaJabatan.setMaximumSize(new Dimension(270, 30));
-        txtNamaJabatan.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(txtNamaJabatan);
 
+        fields.add(new JLabel("Departemen:"));
         txtDepartemen = new JTextField();
-        txtDepartemen.setMaximumSize(new Dimension(270, 30));
-        txtDepartemen.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(txtDepartemen);
 
-        formPanel.add(createFormLabel("Kode Jabatan"));
-        formPanel.add(txtKdJabatan);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        formPanel.add(createFormLabel("Nama Jabatan"));
-        formPanel.add(txtNamaJabatan);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        formPanel.add(createFormLabel("Departemen"));
-        formPanel.add(txtDepartemen);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        formPanel.add(fields, BorderLayout.NORTH);
 
-        // Form buttons
         JPanel actionPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-        actionPanel.setBackground(new Color(43, 43, 43));
-        actionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        actionPanel.setMaximumSize(new Dimension(270, 70));
-
-        btnAdd = new JButton("Tambah");
-        btnEdit = new JButton("Ubah");
+        btnAdd    = new JButton("Tambah");
+        btnEdit   = new JButton("Ubah");
         btnDelete = new JButton("Hapus");
-        btnClear = new JButton("Bersihkan");
-
+        btnClear  = new JButton("Bersihkan");
         actionPanel.add(btnAdd);
         actionPanel.add(btnEdit);
         actionPanel.add(btnDelete);
         actionPanel.add(btnClear);
+        formPanel.add(actionPanel, BorderLayout.SOUTH);
 
-        formPanel.add(actionPanel);
-
-        // HRD Role Restrictions: view-only permissions
         if ("HRD".equals(userRole)) {
             txtNamaJabatan.setEditable(false);
             txtDepartemen.setEditable(false);
@@ -112,33 +86,21 @@ public class JabatanPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
         add(formPanel, BorderLayout.EAST);
 
-        // Core Event bindings
         table.getSelectionModel().addListSelectionListener(e -> handleTableSelection());
         btnAdd.addActionListener(e -> handleAdd());
         btnEdit.addActionListener(e -> handleEdit());
         btnDelete.addActionListener(e -> handleDelete());
         btnClear.addActionListener(e -> clearForm());
 
-        // Initial Data Fetch
         refreshData();
     }
 
-    private JLabel createFormLabel(String text) {
-        JLabel lbl = new JLabel(text);
-        lbl.setForeground(Color.LIGHT_GRAY);
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        return lbl;
-    }
-
-    // Loads positions list from database into the UI table
     public void refreshData() {
         tableModel.setRowCount(0);
         String sql = "SELECT * FROM jabatan ORDER BY kd_jabatan ASC";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
-
             while (rs.next()) {
                 tableModel.addRow(new Object[]{
                         rs.getString("kd_jabatan"),
@@ -152,14 +114,12 @@ public class JabatanPanel extends JPanel {
         clearForm();
     }
 
-    // Handles population of form fields when a table row is highlighted
     private void handleTableSelection() {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow >= 0) {
-            txtKdJabatan.setText((String) tableModel.getValueAt(selectedRow, 0));
-            txtNamaJabatan.setText((String) tableModel.getValueAt(selectedRow, 1));
-            txtDepartemen.setText((String) tableModel.getValueAt(selectedRow, 2));
-
+        int row = table.getSelectedRow();
+        if (row >= 0) {
+            txtKdJabatan.setText((String) tableModel.getValueAt(row, 0));
+            txtNamaJabatan.setText((String) tableModel.getValueAt(row, 1));
+            txtDepartemen.setText((String) tableModel.getValueAt(row, 2));
             if (!"HRD".equals(userRole)) {
                 btnAdd.setEnabled(false);
                 btnEdit.setEnabled(true);
@@ -173,7 +133,6 @@ public class JabatanPanel extends JPanel {
         txtNamaJabatan.setText("");
         txtDepartemen.setText("");
         table.clearSelection();
-
         if (!"HRD".equals(userRole)) {
             btnAdd.setEnabled(true);
             btnEdit.setEnabled(false);
@@ -181,64 +140,55 @@ public class JabatanPanel extends JPanel {
         }
     }
 
-    // Insert new position
     private void handleAdd() {
         String code = txtKdJabatan.getText();
         String name = txtNamaJabatan.getText().trim();
         String dept = txtDepartemen.getText().trim();
-
         if (name.isEmpty() || dept.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nama Jabatan dan Departemen wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         String sql = "INSERT INTO jabatan (kd_jabatan, nama_jabatan, departemen) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, code);
             pstmt.setString(2, name);
             pstmt.setString(3, dept);
-
             pstmt.executeUpdate();
             JOptionPane.showMessageDialog(this, "Data Jabatan berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
             refreshData();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Gagal menyimpan data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
         }
     }
 
-    // Modify selected position
     private void handleEdit() {
         String code = txtKdJabatan.getText();
         String name = txtNamaJabatan.getText().trim();
         String dept = txtDepartemen.getText().trim();
-
         if (name.isEmpty() || dept.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nama Jabatan dan Departemen wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         String sql = "UPDATE jabatan SET nama_jabatan = ?, departemen = ? WHERE kd_jabatan = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
             pstmt.setString(2, dept);
             pstmt.setString(3, code);
-
             pstmt.executeUpdate();
             JOptionPane.showMessageDialog(this, "Data Jabatan berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
             refreshData();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Gagal memperbarui data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
         }
     }
 
-    // Delete selected position
     private void handleDelete() {
         String code = txtKdJabatan.getText();
-        int confirm = JOptionPane.showConfirmDialog(this, "Apakah Anda yakin ingin menghapus jabatan " + code + "?\nKaryawan yang terhubung akan dialihkan ke posisi kosong.", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Hapus jabatan " + code + "? Karyawan terhubung akan dialihkan ke posisi kosong.",
+                "Konfirmasi", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             String sql = "DELETE FROM jabatan WHERE kd_jabatan = ?";
             try (Connection conn = DatabaseHelper.getConnection();
@@ -249,7 +199,6 @@ public class JabatanPanel extends JPanel {
                 refreshData();
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(this, "Gagal menghapus data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
             }
         }
     }

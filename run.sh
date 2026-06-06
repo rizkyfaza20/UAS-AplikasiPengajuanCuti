@@ -11,10 +11,6 @@ if [ ! -f "lib/mysql-connector-j-8.3.0.jar" ]; then
     curl -L -o lib/mysql-connector-j-8.3.0.jar https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.3.0/mysql-connector-j-8.3.0.jar
 fi
 
-if [ ! -f "lib/flatlaf-3.4.1.jar" ]; then
-    echo "Downloading FlatLaf Theme..."
-    curl -L -o lib/flatlaf-3.4.1.jar https://repo1.maven.org/maven2/com/formdev/flatlaf/3.4.1/flatlaf-3.4.1.jar
-fi
 
 # Clean previous build artifacts
 echo "Cleaning old build files..."

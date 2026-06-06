@@ -1,5 +1,4 @@
 -- SQL Schema for PT BSF Employee Leave Application (Aplikasi Pengajuan Cuti PT BSF)
--- Target Database: cuti_karyawan
 
 CREATE DATABASE IF NOT EXISTS cuti_karyawan;
 USE cuti_karyawan;

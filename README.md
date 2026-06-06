@@ -57,19 +57,27 @@ AplikasiPengajuanCuti/
             └── PengajuanCutiPanel.java
 ```
 
----
-
-## Cara Kompilasi dan Menjalankan Aplikasi
+### A. Menggunakan Terminal (Command Line)
 
 Aplikasi ini sudah dilengkapi dengan script otomasi `run.sh` untuk pengguna sistem operasi berbasis Linux/MacOS.
 
-1.  Pastikan MySQL Server Anda aktif.
-2.  Buka terminal pada direktori proyek.
-3.  Jalankan perintah berikut:
-    ```bash
-    ./run.sh
-    ```
-    *Script ini secara otomatis akan mengunduh library jar jika belum ada, membersihkan file class lama, melakukan kompilasi ulang seluruh source code, dan menjalankan aplikasi.*
+1. Pastikan MySQL Server Anda aktif.
+2. Buka terminal pada direktori proyek.
+3. Jalankan perintah berikut:
+   ```bash
+   ./run.sh
+   ```
+   *Script ini secara otomatis akan mengunduh library jar jika belum ada, membersihkan file class lama, melakukan kompilasi ulang seluruh source code, dan menjalankan aplikasi.*
+
+### B. Menggunakan NetBeans IDE
+
+Proyek ini telah dikonfigurasi dengan file proyek NetBeans (`nbproject/` dan `build.xml`).
+
+1. Buka NetBeans IDE Anda.
+2. Pilih menu **File** -> **Open Project**.
+3. Navigasikan ke folder `AplikasiPengajuanCuti` (NetBeans akan mendeteksi folder ini dengan ikon cangkir kopi khas proyek Java SE).
+4. Klik **Open Project**.
+5. Semua file sumber (`src/`) dan dependensi library di folder `lib/` (FlatLaf dan MySQL Connector) akan dimuat secara otomatis. Anda bisa langsung menekan tombol **Run Project (F6)**.
 
 ---
 

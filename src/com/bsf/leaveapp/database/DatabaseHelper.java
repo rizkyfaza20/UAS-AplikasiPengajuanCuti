@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseHelper {
-    private static final String DB_HOST = "localhost";
+    private static final String DB_HOST = "127.0.0.1";
     private static final String DB_PORT = "3306";
     private static final String DB_NAME = "cuti_karyawan";
     private static final String DB_USER = "root";
-    private static final String DB_PASS = "";
+    private static final String DB_PASS = "MySQLServer2456";
 
     private static final String DB_URL_NO_DB = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "?allowMultiQueries=true";
     private static final String DB_URL_WITH_DB = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?allowMultiQueries=true";

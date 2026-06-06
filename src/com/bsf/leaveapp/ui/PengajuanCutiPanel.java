@@ -4,7 +4,6 @@ import com.bsf.leaveapp.database.DatabaseHelper;
 import com.bsf.leaveapp.model.Karyawan;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.Connection;
@@ -35,166 +34,101 @@ public class PengajuanCutiPanel extends JPanel {
     private JButton btnApprove, btnReject;
 
     public PengajuanCutiPanel(String userName, String userRole, DashboardFrame parentFrame) {
-        this.userName = userName;
-        this.userRole = userRole;
+        this.userName    = userName;
+        this.userRole    = userRole;
         this.parentFrame = parentFrame;
 
-        setLayout(new BorderLayout(15, 15));
-        setBackground(new Color(30, 30, 30));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Heading title
         JLabel lblTitle = new JLabel("Pengajuan & Persetujuan Cuti");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 14f));
         add(lblTitle, BorderLayout.NORTH);
 
-        // Table setup
         tableModel = new DefaultTableModel(new Object[]{
-                "Kode Req", "ID Karyawan", "Nama Karyawan", "Departemen", "Tgl Awal", "Tgl Akhir", "Masa Cuti", "Jenis Cuti", "Status"
+                "Kode Req", "ID Karyawan", "Nama Karyawan", "Departemen",
+                "Tgl Awal", "Tgl Akhir", "Masa Cuti", "Jenis Cuti", "Status"
         }, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
         table = new JTable(tableModel);
         table.setFillsViewportHeight(true);
-
-        // Custom JTable status color renderer for premium visual appearance
-        table.getColumnModel().getColumn(8).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                String val = (String) value;
-                if ("PENDING".equals(val)) {
-                    c.setForeground(new Color(241, 196, 15)); // Soft Gold
-                } else if ("DISETUJUI".equals(val)) {
-                    c.setForeground(new Color(46, 204, 113)); // Soft Emerald Green
-                } else if ("DITOLAK".equals(val)) {
-                    c.setForeground(new Color(231, 76, 60)); // Soft Coral Red
-                }
-                setFont(getFont().deriveFont(Font.BOLD));
-                return c;
-            }
-        });
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // Sidebar input layout
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setBackground(new Color(43, 43, 43));
+        // Form panel
+        JPanel formPanel = new JPanel(new BorderLayout(5, 10));
         formPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(60, 60, 60)),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+                BorderFactory.createTitledBorder("Form Pengajuan Cuti"),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-        formPanel.setPreferredSize(new Dimension(320, 0));
+        formPanel.setPreferredSize(new Dimension(300, 0));
 
-        JLabel lblFormTitle = new JLabel("Form Pengajuan Cuti");
-        lblFormTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblFormTitle.setForeground(Color.WHITE);
-        lblFormTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-        formPanel.add(lblFormTitle);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        JPanel fields = new JPanel(new GridLayout(14, 1, 5, 3));
 
+        fields.add(new JLabel("Kode Pengajuan:"));
         txtKdDaftar = new JTextField();
         txtKdDaftar.setEditable(false);
-        txtKdDaftar.setMaximumSize(new Dimension(290, 26));
-        txtKdDaftar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(txtKdDaftar);
 
+        fields.add(new JLabel("Karyawan:"));
         cbKaryawan = new JComboBox<>();
-        cbKaryawan.setMaximumSize(new Dimension(290, 26));
-        cbKaryawan.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(cbKaryawan);
 
+        fields.add(new JLabel("Tanggal Mulai (YYYY-MM-DD):"));
         txtTglAwal = new JTextField();
-        txtTglAwal.setMaximumSize(new Dimension(290, 26));
-        txtTglAwal.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(txtTglAwal);
 
+        fields.add(new JLabel("Tanggal Selesai (YYYY-MM-DD):"));
         txtTglAkhir = new JTextField();
-        txtTglAkhir.setMaximumSize(new Dimension(290, 26));
-        txtTglAkhir.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(txtTglAkhir);
 
-        txtMasaCuti = new JTextField();
+        fields.add(new JLabel("Durasi (Hari - Otomatis):"));
+        txtMasaCuti = new JTextField("0");
         txtMasaCuti.setEditable(false);
-        txtMasaCuti.setMaximumSize(new Dimension(290, 26));
-        txtMasaCuti.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(txtMasaCuti);
 
+        fields.add(new JLabel("Jenis Cuti:"));
         cbJenisCuti = new JComboBox<>(new String[]{"Cuti Sakit", "Cuti Melahirkan", "Cuti Tahunan", "Cuti Alasan Penting"});
-        cbJenisCuti.setMaximumSize(new Dimension(290, 26));
-        cbJenisCuti.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(cbJenisCuti);
 
+        fields.add(new JLabel("Keterangan:"));
         txtKeterangan = new JTextField();
-        txtKeterangan.setMaximumSize(new Dimension(290, 26));
-        txtKeterangan.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fields.add(txtKeterangan);
 
-        formPanel.add(createFormLabel("Kode Pengajuan"));
-        formPanel.add(txtKdDaftar);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        formPanel.add(createFormLabel("Karyawan"));
-        formPanel.add(cbKaryawan);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        formPanel.add(createFormLabel("Tanggal Mulai (YYYY-MM-DD)"));
-        formPanel.add(txtTglAwal);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        formPanel.add(createFormLabel("Tanggal Selesai (YYYY-MM-DD)"));
-        formPanel.add(txtTglAkhir);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        formPanel.add(createFormLabel("Durasi Cuti (Hari - Otomatis)"));
-        formPanel.add(txtMasaCuti);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        formPanel.add(createFormLabel("Jenis Cuti"));
-        formPanel.add(cbJenisCuti);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        formPanel.add(createFormLabel("Keterangan"));
-        formPanel.add(txtKeterangan);
-        formPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        formPanel.add(fields, BorderLayout.NORTH);
 
-        // Action Buttons Setup based on user login role
+        // Buttons by role
         if ("ADMIN".equals(userRole)) {
             JPanel actionPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-            actionPanel.setBackground(new Color(43, 43, 43));
-            actionPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            actionPanel.setMaximumSize(new Dimension(290, 70));
-
-            btnAdd = new JButton("Ajukan Cuti");
-            btnEdit = new JButton("Ubah");
+            btnAdd    = new JButton("Ajukan Cuti");
+            btnEdit   = new JButton("Ubah");
             btnDelete = new JButton("Hapus");
-            btnClear = new JButton("Bersihkan");
-
+            btnClear  = new JButton("Bersihkan");
             actionPanel.add(btnAdd);
             actionPanel.add(btnEdit);
             actionPanel.add(btnDelete);
             actionPanel.add(btnClear);
-
-            formPanel.add(actionPanel);
+            formPanel.add(actionPanel, BorderLayout.SOUTH);
 
             btnAdd.addActionListener(e -> handleAdd());
             btnEdit.addActionListener(e -> handleEdit());
             btnDelete.addActionListener(e -> handleDelete());
             btnClear.addActionListener(e -> clearForm());
         } else {
-            // HRD role can approve or reject leaves
-            JPanel hrdPanel = new JPanel(new GridLayout(2, 1, 5, 10));
-            hrdPanel.setBackground(new Color(43, 43, 43));
-            hrdPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            hrdPanel.setMaximumSize(new Dimension(290, 80));
-
-            btnApprove = new JButton("Setujui Cuti (Approve)");
-            btnApprove.setBackground(new Color(46, 204, 113));
-            btnApprove.setForeground(Color.WHITE);
-
-            btnReject = new JButton("Tolak Cuti (Reject)");
-            btnReject.setBackground(new Color(231, 76, 60));
-            btnReject.setForeground(Color.WHITE);
-
-            hrdPanel.add(btnApprove);
-            hrdPanel.add(btnReject);
-
-            formPanel.add(hrdPanel);
-
             cbKaryawan.setEnabled(false);
             txtTglAwal.setEditable(false);
             txtTglAkhir.setEditable(false);
             cbJenisCuti.setEnabled(false);
             txtKeterangan.setEditable(false);
+
+            JPanel hrdPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+            btnApprove = new JButton("Setujui (Approve)");
+            btnReject  = new JButton("Tolak (Reject)");
+            hrdPanel.add(btnApprove);
+            hrdPanel.add(btnReject);
+            formPanel.add(hrdPanel, BorderLayout.SOUTH);
 
             btnApprove.addActionListener(e -> updateStatus("DISETUJUI"));
             btnReject.addActionListener(e -> updateStatus("DITOLAK"));
@@ -205,32 +139,19 @@ public class PengajuanCutiPanel extends JPanel {
 
         table.getSelectionModel().addListSelectionListener(e -> handleTableSelection());
 
-        // Initial Data Fetch
         refreshData();
     }
 
-    private JLabel createFormLabel(String text) {
-        JLabel lbl = new JLabel(text);
-        lbl.setForeground(Color.LIGHT_GRAY);
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
-        return lbl;
-    }
-
-    // Refresh comboboxes and tables with updated positions list and request history list
     public void refreshData() {
         loadKaryawanComboBox();
         tableModel.setRowCount(0);
-
         String sql = "SELECT p.*, k.nama, j.departemen FROM pengajuan_cuti p " +
                      "JOIN karyawan k ON p.id_karyawan = k.id_karyawan " +
                      "LEFT JOIN jabatan j ON k.kd_jabatan = j.kd_jabatan " +
                      "ORDER BY p.kd_daftar_cuti ASC";
-
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
-
             while (rs.next()) {
                 tableModel.addRow(new Object[]{
                         rs.getString("kd_daftar_cuti"),
@@ -250,22 +171,17 @@ public class PengajuanCutiPanel extends JPanel {
         clearForm();
     }
 
-    // Loads employees list into combobox for selection
     private void loadKaryawanComboBox() {
         cbKaryawan.removeAllItems();
         String sql = "SELECT * FROM karyawan ORDER BY nama ASC";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
-
             while (rs.next()) {
                 cbKaryawan.addItem(new Karyawan(
-                        rs.getString("id_karyawan"),
-                        rs.getString("nama"),
-                        rs.getString("jenis_kelamin"),
-                        rs.getString("alamat"),
-                        rs.getString("nomor_hp"),
-                        rs.getString("status"),
+                        rs.getString("id_karyawan"), rs.getString("nama"),
+                        rs.getString("jenis_kelamin"), rs.getString("alamat"),
+                        rs.getString("nomor_hp"), rs.getString("status"),
                         rs.getString("kd_jabatan")
                 ));
             }
@@ -274,50 +190,40 @@ public class PengajuanCutiPanel extends JPanel {
         }
     }
 
-    // Populate sidebar when a table row is highlighted
     private void handleTableSelection() {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow >= 0) {
-            String code = (String) tableModel.getValueAt(selectedRow, 0);
+        int row = table.getSelectedRow();
+        if (row >= 0) {
+            String code  = (String) tableModel.getValueAt(row, 0);
+            String empId = (String) tableModel.getValueAt(row, 1);
             txtKdDaftar.setText(code);
 
-            String empId = (String) tableModel.getValueAt(selectedRow, 1);
             for (int i = 0; i < cbKaryawan.getItemCount(); i++) {
-                Karyawan k = cbKaryawan.getItemAt(i);
-                if (k.getIdKaryawan().equals(empId)) {
-                    cbKaryawan.setSelectedItem(k);
+                if (cbKaryawan.getItemAt(i).getIdKaryawan().equals(empId)) {
+                    cbKaryawan.setSelectedIndex(i);
                     break;
                 }
             }
 
-            txtTglAwal.setText((String) tableModel.getValueAt(selectedRow, 4));
-            txtTglAkhir.setText((String) tableModel.getValueAt(selectedRow, 5));
-            txtMasaCuti.setText(String.valueOf(tableModel.getValueAt(selectedRow, 6)));
-            cbJenisCuti.setSelectedItem(tableModel.getValueAt(selectedRow, 7));
+            txtTglAwal.setText((String) tableModel.getValueAt(row, 4));
+            txtTglAkhir.setText((String) tableModel.getValueAt(row, 5));
+            txtMasaCuti.setText(String.valueOf(tableModel.getValueAt(row, 6)));
+            cbJenisCuti.setSelectedItem(tableModel.getValueAt(row, 7));
 
-            // Load Keterangan from database since it is not displayed in the JTable directly
             try (Connection conn = DatabaseHelper.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement("SELECT keterangan FROM pengajuan_cuti WHERE kd_daftar_cuti = ?")) {
-                pstmt.setString(1, code);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        txtKeterangan.setText(rs.getString("keterangan"));
-                    }
+                 PreparedStatement p = conn.prepareStatement("SELECT keterangan FROM pengajuan_cuti WHERE kd_daftar_cuti = ?")) {
+                p.setString(1, code);
+                try (ResultSet rs = p.executeQuery()) {
+                    if (rs.next()) txtKeterangan.setText(rs.getString("keterangan"));
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            } catch (SQLException e) { e.printStackTrace(); }
 
-            String status = (String) tableModel.getValueAt(selectedRow, 8);
-
+            String status = (String) tableModel.getValueAt(row, 8);
             if ("ADMIN".equals(userRole)) {
-                // Admin can only edit/delete if the request is still pending
                 boolean isPending = "PENDING".equals(status);
                 btnAdd.setEnabled(false);
                 btnEdit.setEnabled(isPending);
                 btnDelete.setEnabled(true);
             } else {
-                // HRD approval button rules: only enable for pending leaves
                 boolean isPending = "PENDING".equals(status);
                 btnApprove.setEnabled(isPending);
                 btnReject.setEnabled(isPending);
@@ -334,7 +240,6 @@ public class PengajuanCutiPanel extends JPanel {
         cbJenisCuti.setSelectedIndex(0);
         txtKeterangan.setText("");
         table.clearSelection();
-
         if ("ADMIN".equals(userRole)) {
             btnAdd.setEnabled(true);
             btnEdit.setEnabled(false);
@@ -345,124 +250,95 @@ public class PengajuanCutiPanel extends JPanel {
         }
     }
 
-    // Helper to calculate date differences
     private int calculateDuration() {
         try {
             LocalDate start = LocalDate.parse(txtTglAwal.getText().trim());
-            LocalDate end = LocalDate.parse(txtTglAkhir.getText().trim());
+            LocalDate end   = LocalDate.parse(txtTglAkhir.getText().trim());
             long days = ChronoUnit.DAYS.between(start, end) + 1;
             if (days < 1) {
                 JOptionPane.showMessageDialog(this, "Tanggal selesai tidak boleh sebelum tanggal mulai!", "Peringatan", JOptionPane.WARNING_MESSAGE);
                 return -1;
             }
+            txtMasaCuti.setText(String.valueOf(days));
             return (int) days;
         } catch (DateTimeParseException e) {
-            JOptionPane.showMessageDialog(this, "Format tanggal tidak valid! Gunakan format YYYY-MM-DD.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Format tanggal tidak valid! Gunakan YYYY-MM-DD.", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return -1;
         }
     }
 
-    // Submits a new leave request (placed in PENDING status)
     private void handleAdd() {
         Karyawan emp = (Karyawan) cbKaryawan.getSelectedItem();
-        if (emp == null) {
-            JOptionPane.showMessageDialog(this, "Silakan pilih karyawan!", "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
+        if (emp == null) { JOptionPane.showMessageDialog(this, "Pilih karyawan!", "Peringatan", JOptionPane.WARNING_MESSAGE); return; }
         int duration = calculateDuration();
         if (duration == -1) return;
 
-        // Query sisa quota cuti to ensure the employee is eligible before request registration
-        String qCuti = "SELECT kd_cuti, jumlah_cuti FROM cuti WHERE id_karyawan = ?";
-        String code = txtKdDaftar.getText();
-        String tglAwal = txtTglAwal.getText().trim();
-        String tglAkhir = txtTglAkhir.getText().trim();
+        String code  = txtKdDaftar.getText();
+        String start = txtTglAwal.getText().trim();
+        String end   = txtTglAkhir.getText().trim();
         String jenis = (String) cbJenisCuti.getSelectedItem();
-        String desc = txtKeterangan.getText().trim();
+        String desc  = txtKeterangan.getText().trim();
 
         try (Connection conn = DatabaseHelper.getConnection();
-             PreparedStatement pstmtCuti = conn.prepareStatement(qCuti)) {
-
-            pstmtCuti.setString(1, emp.getIdKaryawan());
-            try (ResultSet rs = pstmtCuti.executeQuery()) {
+             PreparedStatement pQ = conn.prepareStatement("SELECT kd_cuti, jumlah_cuti FROM cuti WHERE id_karyawan = ?")) {
+            pQ.setString(1, emp.getIdKaryawan());
+            try (ResultSet rs = pQ.executeQuery()) {
                 if (rs.next()) {
                     String kdCuti = rs.getString("kd_cuti");
-                    int quota = rs.getInt("jumlah_cuti");
-
+                    int quota     = rs.getInt("jumlah_cuti");
                     if ("Cuti Tahunan".equals(jenis) && duration > quota) {
-                        JOptionPane.showMessageDialog(this, "Pengajuan gagal! Sisa kuota cuti tahunan karyawan ini hanya " + quota + " hari.", "Batas Kuota Dilampaui", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(this, "Sisa kuota cuti hanya " + quota + " hari!", "Batas Kuota", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
-
-                    // Proceed insertion in PENDING state
-                    String sql = "INSERT INTO pengajuan_cuti (kd_daftar_cuti, id_karyawan, kd_cuti, tanggal_awal, tanggal_akhir, masa_cuti, jenis_cuti, keterangan, status_pengajuan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')";
-                    try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                        pstmt.setString(1, code);
-                        pstmt.setString(2, emp.getIdKaryawan());
-                        pstmt.setString(3, kdCuti);
-                        pstmt.setString(4, tglAwal);
-                        pstmt.setString(5, tglAkhir);
-                        pstmt.setInt(6, duration);
-                        pstmt.setString(7, jenis);
-                        pstmt.setString(8, desc);
-                        pstmt.executeUpdate();
-
-                        JOptionPane.showMessageDialog(this, "Pengajuan cuti berhasil diajukan! Menunggu persetujuan HRD.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                    try (PreparedStatement p = conn.prepareStatement(
+                            "INSERT INTO pengajuan_cuti (kd_daftar_cuti,id_karyawan,kd_cuti,tanggal_awal,tanggal_akhir,masa_cuti,jenis_cuti,keterangan,status_pengajuan) VALUES (?,?,?,?,?,?,?,?,'PENDING')")) {
+                        p.setString(1, code); p.setString(2, emp.getIdKaryawan()); p.setString(3, kdCuti);
+                        p.setString(4, start); p.setString(5, end); p.setInt(6, duration);
+                        p.setString(7, jenis); p.setString(8, desc);
+                        p.executeUpdate();
+                        JOptionPane.showMessageDialog(this, "Pengajuan berhasil! Menunggu persetujuan HRD.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
                         parentFrame.refreshStats();
                         refreshData();
                     }
                 } else {
-                    JOptionPane.showMessageDialog(this, "Karyawan ini tidak memiliki catatan saldo cuti!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Karyawan tidak memiliki catatan saldo cuti!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Gagal menyimpan pengajuan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Gagal menyimpan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // Edit pending request
     private void handleEdit() {
-        String code = txtKdDaftar.getText();
+        String code  = txtKdDaftar.getText();
         Karyawan emp = (Karyawan) cbKaryawan.getSelectedItem();
         if (emp == null) return;
-
         int duration = calculateDuration();
         if (duration == -1) return;
 
-        String tglAwal = txtTglAwal.getText().trim();
-        String tglAkhir = txtTglAkhir.getText().trim();
+        String start = txtTglAwal.getText().trim();
+        String end   = txtTglAkhir.getText().trim();
         String jenis = (String) cbJenisCuti.getSelectedItem();
-        String desc = txtKeterangan.getText().trim();
+        String desc  = txtKeterangan.getText().trim();
 
-        // Validate quota
-        String qCuti = "SELECT jumlah_cuti FROM cuti WHERE id_karyawan = ?";
         try (Connection conn = DatabaseHelper.getConnection();
-             PreparedStatement pstmtCuti = conn.prepareStatement(qCuti)) {
-            pstmtCuti.setString(1, emp.getIdKaryawan());
-            try (ResultSet rs = pstmtCuti.executeQuery()) {
+             PreparedStatement pQ = conn.prepareStatement("SELECT jumlah_cuti FROM cuti WHERE id_karyawan = ?")) {
+            pQ.setString(1, emp.getIdKaryawan());
+            try (ResultSet rs = pQ.executeQuery()) {
                 if (rs.next()) {
                     int quota = rs.getInt("jumlah_cuti");
                     if ("Cuti Tahunan".equals(jenis) && duration > quota) {
-                        JOptionPane.showMessageDialog(this, "Pengajuan gagal! Sisa kuota cuti tahunan karyawan ini hanya " + quota + " hari.", "Batas Kuota Dilampaui", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(this, "Sisa kuota cuti hanya " + quota + " hari!", "Batas Kuota", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
-
-                    String sql = "UPDATE pengajuan_cuti SET tanggal_awal = ?, tanggal_akhir = ?, masa_cuti = ?, jenis_cuti = ?, keterangan = ? WHERE kd_daftar_cuti = ? AND status_pengajuan = 'PENDING'";
-                    try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                        pstmt.setString(1, tglAwal);
-                        pstmt.setString(2, tglAkhir);
-                        pstmt.setInt(3, duration);
-                        pstmt.setString(4, jenis);
-                        pstmt.setString(5, desc);
-                        pstmt.setString(6, code);
-
-                        int updated = pstmt.executeUpdate();
+                    try (PreparedStatement p = conn.prepareStatement(
+                            "UPDATE pengajuan_cuti SET tanggal_awal=?,tanggal_akhir=?,masa_cuti=?,jenis_cuti=?,keterangan=? WHERE kd_daftar_cuti=? AND status_pengajuan='PENDING'")) {
+                        p.setString(1, start); p.setString(2, end); p.setInt(3, duration);
+                        p.setString(4, jenis); p.setString(5, desc); p.setString(6, code);
+                        int updated = p.executeUpdate();
                         if (updated > 0) {
-                            JOptionPane.showMessageDialog(this, "Pengajuan cuti berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                            parentFrame.refreshStats();
-                            refreshData();
+                            JOptionPane.showMessageDialog(this, "Pengajuan berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                            parentFrame.refreshStats(); refreshData();
                         } else {
                             JOptionPane.showMessageDialog(this, "Pengajuan tidak dapat diubah karena sudah diproses!", "Peringatan", JOptionPane.WARNING_MESSAGE);
                         }
@@ -470,74 +346,49 @@ public class PengajuanCutiPanel extends JPanel {
                 }
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Gagal memperbarui pengajuan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Gagal memperbarui: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // Delete request. If already approved, refunds leave days back to employee
     private void handleDelete() {
         String code = txtKdDaftar.getText();
-        int confirm = JOptionPane.showConfirmDialog(this, "Apakah Anda yakin ingin menghapus pengajuan " + code + "?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            Connection conn = null;
-            try {
-                conn = DatabaseHelper.getConnection();
-                conn.setAutoCommit(false);
+        int confirm = JOptionPane.showConfirmDialog(this, "Hapus pengajuan " + code + "?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) return;
 
-                // Fetch details to check if we need to refund approved leave duration
-                String qDetails = "SELECT id_karyawan, masa_cuti, status_pengajuan FROM pengajuan_cuti WHERE kd_daftar_cuti = ?";
-                String idKaryawan = null;
-                int duration = 0;
-                String status = null;
+        Connection conn = null;
+        try {
+            conn = DatabaseHelper.getConnection();
+            conn.setAutoCommit(false);
 
-                try (PreparedStatement pstmt = conn.prepareStatement(qDetails)) {
-                    pstmt.setString(1, code);
-                    try (ResultSet rs = pstmt.executeQuery()) {
-                        if (rs.next()) {
-                            idKaryawan = rs.getString("id_karyawan");
-                            duration = rs.getInt("masa_cuti");
-                            status = rs.getString("status_pengajuan");
-                        }
-                    }
-                }
-
-                if (idKaryawan != null) {
-                    // 1. Delete request record
-                    try (PreparedStatement pstmtDel = conn.prepareStatement("DELETE FROM pengajuan_cuti WHERE kd_daftar_cuti = ?")) {
-                        pstmtDel.setString(1, code);
-                        pstmtDel.executeUpdate();
-                    }
-
-                    // 2. Refund balance back if status was 'DISETUJUI'
-                    if ("DISETUJUI".equals(status)) {
-                        try (PreparedStatement pstmtRefund = conn.prepareStatement("UPDATE cuti SET jumlah_cuti = jumlah_cuti + ? WHERE id_karyawan = ?")) {
-                            pstmtRefund.setInt(1, duration);
-                            pstmtRefund.setString(2, idKaryawan);
-                            pstmtRefund.executeUpdate();
-                        }
-                    }
-                }
-
-                conn.commit();
-                JOptionPane.showMessageDialog(this, "Pengajuan cuti berhasil dihapus!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-                parentFrame.refreshStats();
-                refreshData();
-            } catch (SQLException e) {
-                if (conn != null) {
-                    try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-                }
-                JOptionPane.showMessageDialog(this, "Gagal menghapus pengajuan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            } finally {
-                if (conn != null) {
-                    try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            String idKaryawan = null; int duration = 0; String status = null;
+            try (PreparedStatement p = conn.prepareStatement("SELECT id_karyawan, masa_cuti, status_pengajuan FROM pengajuan_cuti WHERE kd_daftar_cuti = ?")) {
+                p.setString(1, code);
+                try (ResultSet rs = p.executeQuery()) {
+                    if (rs.next()) { idKaryawan = rs.getString("id_karyawan"); duration = rs.getInt("masa_cuti"); status = rs.getString("status_pengajuan"); }
                 }
             }
+
+            if (idKaryawan != null) {
+                try (PreparedStatement p = conn.prepareStatement("DELETE FROM pengajuan_cuti WHERE kd_daftar_cuti = ?")) {
+                    p.setString(1, code); p.executeUpdate();
+                }
+                if ("DISETUJUI".equals(status)) {
+                    try (PreparedStatement p = conn.prepareStatement("UPDATE cuti SET jumlah_cuti = jumlah_cuti + ? WHERE id_karyawan = ?")) {
+                        p.setInt(1, duration); p.setString(2, idKaryawan); p.executeUpdate();
+                    }
+                }
+            }
+            conn.commit();
+            JOptionPane.showMessageDialog(this, "Pengajuan berhasil dihapus!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            parentFrame.refreshStats(); refreshData();
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            JOptionPane.showMessageDialog(this, "Gagal menghapus: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
         }
     }
 
-    // Handles approval or rejection of leave request by HRD role
     private void updateStatus(String newStatus) {
         String code = txtKdDaftar.getText();
         if (code.isEmpty()) return;
@@ -547,75 +398,46 @@ public class PengajuanCutiPanel extends JPanel {
             conn = DatabaseHelper.getConnection();
             conn.setAutoCommit(false);
 
-            // Fetch details first
-            String qReq = "SELECT id_karyawan, masa_cuti, status_pengajuan FROM pengajuan_cuti WHERE kd_daftar_cuti = ?";
-            String idKaryawan = null;
-            int duration = 0;
-            String prevStatus = null;
-
-            try (PreparedStatement pstmt = conn.prepareStatement(qReq)) {
-                pstmt.setString(1, code);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        idKaryawan = rs.getString("id_karyawan");
-                        duration = rs.getInt("masa_cuti");
-                        prevStatus = rs.getString("status_pengajuan");
-                    }
+            String idKaryawan = null; int duration = 0;
+            try (PreparedStatement p = conn.prepareStatement("SELECT id_karyawan, masa_cuti FROM pengajuan_cuti WHERE kd_daftar_cuti = ?")) {
+                p.setString(1, code);
+                try (ResultSet rs = p.executeQuery()) {
+                    if (rs.next()) { idKaryawan = rs.getString("id_karyawan"); duration = rs.getInt("masa_cuti"); }
                 }
             }
 
-            if (idKaryawan == null) {
-                conn.rollback();
-                return;
-            }
+            if (idKaryawan == null) { conn.rollback(); return; }
 
-            // Perform business rules check for Approval state
             if ("DISETUJUI".equals(newStatus)) {
-                // Fetch current leave quota
-                try (PreparedStatement pstmtQ = conn.prepareStatement("SELECT jumlah_cuti FROM cuti WHERE id_karyawan = ?")) {
-                    pstmtQ.setString(1, idKaryawan);
-                    try (ResultSet rs = pstmtQ.executeQuery()) {
+                try (PreparedStatement p = conn.prepareStatement("SELECT jumlah_cuti FROM cuti WHERE id_karyawan = ?")) {
+                    p.setString(1, idKaryawan);
+                    try (ResultSet rs = p.executeQuery()) {
                         if (rs.next()) {
                             int quota = rs.getInt("jumlah_cuti");
                             if (duration > quota) {
-                                JOptionPane.showMessageDialog(this, "Persetujuan ditolak! Karyawan tidak memiliki saldo cuti yang cukup (Sisa: " + quota + " hari).", "Peringatan", JOptionPane.WARNING_MESSAGE);
-                                conn.rollback();
-                                return;
+                                JOptionPane.showMessageDialog(this, "Saldo cuti karyawan tidak mencukupi (Sisa: " + quota + " hari).", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                                conn.rollback(); return;
                             }
                         }
                     }
                 }
-
-                // Deduct balance from remaining leave days
-                try (PreparedStatement pstmtDec = conn.prepareStatement("UPDATE cuti SET jumlah_cuti = jumlah_cuti - ? WHERE id_karyawan = ?")) {
-                    pstmtDec.setInt(1, duration);
-                    pstmtDec.setString(2, idKaryawan);
-                    pstmtDec.executeUpdate();
+                try (PreparedStatement p = conn.prepareStatement("UPDATE cuti SET jumlah_cuti = jumlah_cuti - ? WHERE id_karyawan = ?")) {
+                    p.setInt(1, duration); p.setString(2, idKaryawan); p.executeUpdate();
                 }
             }
 
-            // Write status updates
-            try (PreparedStatement pstmtUpdate = conn.prepareStatement("UPDATE pengajuan_cuti SET status_pengajuan = ? WHERE kd_daftar_cuti = ?")) {
-                pstmtUpdate.setString(1, newStatus);
-                pstmtUpdate.setString(2, code);
-                pstmtUpdate.executeUpdate();
+            try (PreparedStatement p = conn.prepareStatement("UPDATE pengajuan_cuti SET status_pengajuan = ? WHERE kd_daftar_cuti = ?")) {
+                p.setString(1, newStatus); p.setString(2, code); p.executeUpdate();
             }
 
             conn.commit();
-            JOptionPane.showMessageDialog(this, "Status pengajuan diperbarui menjadi: " + newStatus, "Sukses", JOptionPane.INFORMATION_MESSAGE);
-            parentFrame.refreshStats();
-            refreshData();
-
+            JOptionPane.showMessageDialog(this, "Status diperbarui menjadi: " + newStatus, "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            parentFrame.refreshStats(); refreshData();
         } catch (SQLException e) {
-            if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-            }
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             JOptionPane.showMessageDialog(this, "Gagal memperbarui status: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
         } finally {
-            if (conn != null) {
-                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
-            }
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
         }
     }
 }

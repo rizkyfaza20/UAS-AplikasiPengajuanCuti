@@ -7,11 +7,11 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        // 1. Setup modern theme look and feel
+        // 1. Setup system default look and feel
         try {
-            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatDarkLaf());
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
-            System.err.println("Failed to initialize FlatLaf theme. Falling back to default.");
+            System.err.println("Failed to set system look and feel. Using default.");
         }
 
         // 2. Bootstrap database and schema
