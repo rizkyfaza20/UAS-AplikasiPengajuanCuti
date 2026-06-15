@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS karyawan (
     nomor_hp VARCHAR(20),
     status VARCHAR(50) NOT NULL, -- e.g., 'Tetap', 'Kontrak'
     kd_jabatan VARCHAR(20),
+    username VARCHAR(50) UNIQUE,
+    password VARCHAR(50),
     FOREIGN KEY (kd_jabatan) REFERENCES jabatan(kd_jabatan) ON DELETE SET NULL
 );
 

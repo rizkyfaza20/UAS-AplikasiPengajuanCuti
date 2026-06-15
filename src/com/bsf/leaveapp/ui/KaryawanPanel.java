@@ -10,8 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class KaryawanPanel extends JPanel {
     private String userRole;
@@ -25,6 +23,8 @@ public class KaryawanPanel extends JPanel {
     private JTextField txtNomorHp;
     private JComboBox<String> cbStatus;
     private JComboBox<Jabatan> cbJabatan;
+    private JTextField txtUsername;
+    private JTextField txtPassword;
 
     private JButton btnAdd, btnEdit, btnDelete, btnClear;
 
@@ -38,7 +38,7 @@ public class KaryawanPanel extends JPanel {
         add(lblTitle, BorderLayout.NORTH);
 
         tableModel = new DefaultTableModel(new Object[]{
-                "ID Karyawan", "Nama", "Jenis Kelamin", "Alamat", "No HP", "Status", "Jabatan", "Departemen"
+                "ID Karyawan", "Nama", "Jenis Kelamin", "Alamat", "No HP", "Status", "Jabatan", "Departemen", "Username", "Password"
         }, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -46,17 +46,20 @@ public class KaryawanPanel extends JPanel {
         table = new JTable(tableModel);
         table.setFillsViewportHeight(true);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // Hide password column for security in UI, although it's there in the model
+        table.removeColumn(table.getColumnModel().getColumn(9));
+        
         JScrollPane scrollPane = new JScrollPane(table);
 
         // Form panel
         JPanel formPanel = new JPanel(new BorderLayout(5, 10));
         formPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Form Data Karyawan"),
+                BorderFactory.createTitledBorder("Form Data Karyawan & Akun"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
         formPanel.setPreferredSize(new Dimension(290, 0));
 
-        JPanel fields = new JPanel(new GridLayout(14, 1, 5, 3));
+        JPanel fields = new JPanel(new GridLayout(18, 1, 5, 1));
 
         fields.add(new JLabel("ID Karyawan:"));
         txtIdKaryawan = new JTextField();
@@ -87,6 +90,14 @@ public class KaryawanPanel extends JPanel {
         cbJabatan = new JComboBox<>();
         fields.add(cbJabatan);
 
+        fields.add(new JLabel("Username Login:"));
+        txtUsername = new JTextField();
+        fields.add(txtUsername);
+
+        fields.add(new JLabel("Password Login:"));
+        txtPassword = new JTextField();
+        fields.add(txtPassword);
+
         formPanel.add(fields, BorderLayout.NORTH);
 
         JPanel actionPanel = new JPanel(new GridLayout(2, 2, 5, 5));
@@ -107,6 +118,8 @@ public class KaryawanPanel extends JPanel {
             txtNomorHp.setEditable(false);
             cbStatus.setEnabled(false);
             cbJabatan.setEnabled(false);
+            txtUsername.setEditable(false);
+            txtPassword.setEditable(false);
             btnAdd.setEnabled(false);
             btnEdit.setEnabled(false);
             btnDelete.setEnabled(false);
@@ -141,7 +154,9 @@ public class KaryawanPanel extends JPanel {
                         rs.getString("nomor_hp"),
                         rs.getString("status"),
                         rs.getString("nama_jabatan") != null ? rs.getString("nama_jabatan") : "-",
-                        rs.getString("departemen")   != null ? rs.getString("departemen")   : "-"
+                        rs.getString("departemen")   != null ? rs.getString("departemen")   : "-",
+                        rs.getString("username"),
+                        rs.getString("password")
                 });
             }
         } catch (SQLException e) {
@@ -184,6 +199,9 @@ public class KaryawanPanel extends JPanel {
                     break;
                 }
             }
+            txtUsername.setText(tableModel.getValueAt(row, 8) != null ? (String) tableModel.getValueAt(row, 8) : "");
+            txtPassword.setText(tableModel.getValueAt(row, 9) != null ? (String) tableModel.getValueAt(row, 9) : "");
+            
             if (!"HRD".equals(userRole)) {
                 btnAdd.setEnabled(false);
                 btnEdit.setEnabled(true);
@@ -200,6 +218,8 @@ public class KaryawanPanel extends JPanel {
         txtNomorHp.setText("");
         cbStatus.setSelectedIndex(0);
         if (cbJabatan.getItemCount() > 0) cbJabatan.setSelectedIndex(0);
+        txtUsername.setText("");
+        txtPassword.setText("");
         table.clearSelection();
         if (!"HRD".equals(userRole)) {
             btnAdd.setEnabled(true);
@@ -216,9 +236,11 @@ public class KaryawanPanel extends JPanel {
         String phone  = txtNomorHp.getText().trim();
         String status = (String) cbStatus.getSelectedItem();
         Jabatan jab   = (Jabatan) cbJabatan.getSelectedItem();
+        String user   = txtUsername.getText().trim();
+        String pass   = txtPassword.getText().trim();
 
-        if (name.isEmpty() || jab == null) {
-            JOptionPane.showMessageDialog(this, "Nama Lengkap dan Jabatan wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        if (name.isEmpty() || jab == null || user.isEmpty() || pass.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nama Lengkap, Jabatan, Username, dan Password wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -228,10 +250,10 @@ public class KaryawanPanel extends JPanel {
             conn.setAutoCommit(false);
 
             try (PreparedStatement p = conn.prepareStatement(
-                    "INSERT INTO karyawan (id_karyawan, nama, jenis_kelamin, alamat, nomor_hp, status, kd_jabatan) VALUES (?,?,?,?,?,?,?)")) {
+                    "INSERT INTO karyawan (id_karyawan, nama, jenis_kelamin, alamat, nomor_hp, status, kd_jabatan, username, password) VALUES (?,?,?,?,?,?,?,?,?)")) {
                 p.setString(1, id); p.setString(2, name); p.setString(3, gender);
                 p.setString(4, addr); p.setString(5, phone); p.setString(6, status);
-                p.setString(7, jab.getKdJabatan());
+                p.setString(7, jab.getKdJabatan()); p.setString(8, user); p.setString(9, pass);
                 p.executeUpdate();
             }
 
@@ -247,7 +269,7 @@ public class KaryawanPanel extends JPanel {
             refreshData();
         } catch (SQLException e) {
             if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
-            JOptionPane.showMessageDialog(this, "Gagal menyimpan data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Gagal menyimpan data (mungkin username sudah dipakai): " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
         }
@@ -261,18 +283,20 @@ public class KaryawanPanel extends JPanel {
         String phone  = txtNomorHp.getText().trim();
         String status = (String) cbStatus.getSelectedItem();
         Jabatan jab   = (Jabatan) cbJabatan.getSelectedItem();
+        String user   = txtUsername.getText().trim();
+        String pass   = txtPassword.getText().trim();
 
-        if (name.isEmpty() || jab == null) {
-            JOptionPane.showMessageDialog(this, "Nama Lengkap dan Jabatan wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        if (name.isEmpty() || jab == null || user.isEmpty() || pass.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nama Lengkap, Jabatan, Username, dan Password wajib diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String sql = "UPDATE karyawan SET nama=?, jenis_kelamin=?, alamat=?, nomor_hp=?, status=?, kd_jabatan=? WHERE id_karyawan=?";
+        String sql = "UPDATE karyawan SET nama=?, jenis_kelamin=?, alamat=?, nomor_hp=?, status=?, kd_jabatan=?, username=?, password=? WHERE id_karyawan=?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement p = conn.prepareStatement(sql)) {
             p.setString(1, name); p.setString(2, gender); p.setString(3, addr);
             p.setString(4, phone); p.setString(5, status); p.setString(6, jab.getKdJabatan());
-            p.setString(7, id);
+            p.setString(7, user); p.setString(8, pass); p.setString(9, id);
             p.executeUpdate();
             JOptionPane.showMessageDialog(this, "Data Karyawan berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
             refreshData();

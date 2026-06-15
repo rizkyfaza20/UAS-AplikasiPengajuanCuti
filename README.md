@@ -83,16 +83,16 @@ Proyek ini telah dikonfigurasi dengan file proyek NetBeans (`nbproject/` dan `bu
 
 ## Data Akun Pengguna Bawaan (Default Accounts)
 
-Database akan secara otomatis terisi dengan dua akun pengujian berikut saat pertama kali dijalankan:
+Database akan secara otomatis terisi dengan data sampel berikut saat pertama kali dijalankan:
 
 *   **Akun ADMIN:**
-    *   Username: `admin`
-    *   Password: `admin123`
-    *   Fungsi: Manajemen input data karyawan, jabatan, dan registrasi cuti.
-
+    *   `admin` / `admin123` (Administrator Utama)
+    *   `admin2` / `admin123` (Admin Kedua)
 *   **Akun HRD:**
-    *   Username: `hrd`
-    *   Password: `hrd123`
-    *   Fungsi: Meninjau dan menyetujui/menolak pengajuan cuti, serta mencetak laporan bulanan/harian.
+    *   `hrd` / `hrd123` (HRD Manager Utama)
+    *   `hrd2` / `hrd123` (HRD Assistant)
+*   **Akun KARYAWAN:**
+    *   Sebanyak 10 data Karyawan akan dibuat secara otomatis, lengkap dengan jabatan, data diri, dan kuota cuti.
+    *   Anda dapat login menggunakan role KARYAWAN dengan username berupa nama depan (misal: `budi`, `siti`, `joko`) dan password default `pass123`.
 
-*(Anda juga bisa membuat akun baru secara manual melalui tombol **Sign Up** di halaman Login).*
+*Catatan: Anda juga bisa memasukkan data secara manual menggunakan file `seed.sql` yang telah disertakan.*

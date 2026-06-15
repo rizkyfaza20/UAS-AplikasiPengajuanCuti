@@ -27,7 +27,7 @@ public class DashboardFrame extends JFrame {
 
         setTitle("PT BSF - Sistem Pengajuan Cuti (" + userRole + ")");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1100, 680);
+        setSize(1200, 750);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
@@ -40,11 +40,13 @@ public class DashboardFrame extends JFrame {
         ));
 
         JLabel lblLogo = new JLabel("PT BSF - Sistem Pengajuan Cuti Karyawan");
-        lblLogo.setFont(lblLogo.getFont().deriveFont(Font.BOLD, 14f));
+        lblLogo.setFont(lblLogo.getFont().deriveFont(Font.BOLD, 16f));
 
         JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         JLabel lblWelcome = new JLabel("Halo, " + userName + " (" + userRole + ")");
+        lblWelcome.setFont(lblWelcome.getFont().deriveFont(Font.PLAIN, 14f));
         JButton btnLogout = new JButton("Logout");
+        btnLogout.setFont(btnLogout.getFont().deriveFont(14f));
         btnLogout.addActionListener(e -> {
             new LoginFrame().setVisible(true);
             this.dispose();
@@ -59,7 +61,7 @@ public class DashboardFrame extends JFrame {
         // --- Sidebar ---
         JPanel sidebarPanel = new JPanel();
         sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
-        sidebarPanel.setPreferredSize(new Dimension(190, 0));
+        sidebarPanel.setPreferredSize(new Dimension(200, 0));
         sidebarPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY),
                 BorderFactory.createEmptyBorder(10, 5, 10, 5)
@@ -99,10 +101,11 @@ public class DashboardFrame extends JFrame {
 
     private void addSidebarButton(JPanel parent, String text, String cardName) {
         JButton btn = new JButton(text);
-        btn.setMaximumSize(new Dimension(180, 35));
-        btn.setPreferredSize(new Dimension(180, 35));
+        btn.setMaximumSize(new Dimension(190, 38));
+        btn.setPreferredSize(new Dimension(190, 38));
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setFont(btn.getFont().deriveFont(14f));
 
         btn.addActionListener(e -> {
             cardLayout.show(contentPanel, cardName);

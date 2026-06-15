@@ -17,39 +17,88 @@ public class LoginFrame extends JFrame {
     public LoginFrame() {
         setTitle("PT BSF - Sistem Pengajuan Cuti");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(380, 280);
+        setSize(520, 420);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 15));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
 
-        // Title
-        JLabel lblTitle = new JLabel("Login - Sistem Pengajuan Cuti PT BSF", SwingConstants.CENTER);
-        lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 13f));
-        mainPanel.add(lblTitle, BorderLayout.NORTH);
+        // Title section
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
 
-        // Form
-        JPanel formPanel = new JPanel(new GridLayout(6, 1, 5, 5));
+        JLabel lblAppName = new JLabel("Sistem Pengajuan Cuti");
+        lblAppName.setFont(lblAppName.getFont().deriveFont(Font.BOLD, 20f));
+        lblAppName.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        formPanel.add(new JLabel("Username:"));
-        txtUsername = new JTextField();
-        formPanel.add(txtUsername);
+        JLabel lblCompany = new JLabel("PT BSF Indonesia");
+        lblCompany.setFont(lblCompany.getFont().deriveFont(Font.PLAIN, 14f));
+        lblCompany.setForeground(Color.GRAY);
+        lblCompany.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        formPanel.add(new JLabel("Password:"));
-        txtPassword = new JPasswordField();
-        formPanel.add(txtPassword);
+        titlePanel.add(lblAppName);
+        titlePanel.add(Box.createRigidArea(new Dimension(0, 4)));
+        titlePanel.add(lblCompany);
+        titlePanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        formPanel.add(new JLabel("Role / Hak Akses:"));
-        cbRole = new JComboBox<>(new String[]{"ADMIN", "HRD"});
-        formPanel.add(cbRole);
+        mainPanel.add(titlePanel, BorderLayout.NORTH);
+
+        // Form with GridBagLayout for proper sizing
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Masukkan Kredensial"),
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(6, 5, 6, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Username
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
+        JLabel lblUser = new JLabel("Username:");
+        lblUser.setFont(lblUser.getFont().deriveFont(Font.PLAIN, 14f));
+        formPanel.add(lblUser, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
+        txtUsername = new JTextField(20);
+        txtUsername.setFont(txtUsername.getFont().deriveFont(14f));
+        formPanel.add(txtUsername, gbc);
+
+        // Password
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
+        JLabel lblPass = new JLabel("Password:");
+        lblPass.setFont(lblPass.getFont().deriveFont(Font.PLAIN, 14f));
+        formPanel.add(lblPass, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
+        txtPassword = new JPasswordField(20);
+        txtPassword.setFont(txtPassword.getFont().deriveFont(14f));
+        formPanel.add(txtPassword, gbc);
+
+        // Role
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
+        JLabel lblRole = new JLabel("Role / Hak Akses:");
+        lblRole.setFont(lblRole.getFont().deriveFont(Font.PLAIN, 14f));
+        formPanel.add(lblRole, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0;
+        cbRole = new JComboBox<>(new String[]{"ADMIN", "HRD", "KARYAWAN"});
+        cbRole.setFont(cbRole.getFont().deriveFont(14f));
+        formPanel.add(cbRole, gbc);
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
         // Buttons
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         JButton btnLogin = new JButton("Login");
+        btnLogin.setFont(btnLogin.getFont().deriveFont(Font.BOLD, 14f));
+        btnLogin.setPreferredSize(new Dimension(140, 38));
+
         JButton btnSignUp = new JButton("Daftar Akun");
+        btnSignUp.setFont(btnSignUp.getFont().deriveFont(Font.PLAIN, 14f));
+        btnSignUp.setPreferredSize(new Dimension(140, 38));
+
         btnPanel.add(btnLogin);
         btnPanel.add(btnSignUp);
         mainPanel.add(btnPanel, BorderLayout.SOUTH);
@@ -73,63 +122,103 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        String query = "SELECT * FROM admin WHERE username = ? AND password = ? AND hak_akses = ?";
-        try (Connection conn = DatabaseHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
-            pstmt.setString(3, role);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    String name = rs.getString("nama_admin");
-                    new DashboardFrame(name, role).setVisible(true);
-                    this.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Username, Password, atau Role salah!", "Gagal Login", JOptionPane.ERROR_MESSAGE);
+        if ("KARYAWAN".equals(role)) {
+            String query = "SELECT * FROM karyawan WHERE username = ? AND password = ?";
+            try (Connection conn = DatabaseHelper.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, username);
+                pstmt.setString(2, password);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        String id = rs.getString("id_karyawan");
+                        String name = rs.getString("nama");
+                        new KaryawanDashboardFrame(id, name).setVisible(true);
+                        this.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Username atau Password Karyawan salah!", "Gagal Login", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Kesalahan database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Kesalahan database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+        } else {
+            String query = "SELECT * FROM admin WHERE username = ? AND password = ? AND hak_akses = ?";
+            try (Connection conn = DatabaseHelper.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+                pstmt.setString(1, username);
+                pstmt.setString(2, password);
+                pstmt.setString(3, role);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        String name = rs.getString("nama_admin");
+                        new DashboardFrame(name, role).setVisible(true);
+                        this.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Username, Password, atau Role salah!", "Gagal Login", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Kesalahan database: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
         }
     }
 
     private void openSignUpDialog() {
         JDialog signupDialog = new JDialog(this, "Daftar Akun Admin/HRD", true);
-        signupDialog.setSize(350, 320);
+        signupDialog.setSize(500, 450);
         signupDialog.setLocationRelativeTo(this);
         signupDialog.setResizable(false);
 
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 15));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        JLabel lblTitle = new JLabel("Daftar Akun Baru", SwingConstants.CENTER);
-        lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 13f));
+        JLabel lblTitle = new JLabel("Registrasi Akun Baru", SwingConstants.CENTER);
+        lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD, 18f));
         mainPanel.add(lblTitle, BorderLayout.NORTH);
 
-        JPanel gridPanel = new JPanel(new GridLayout(10, 1, 5, 3));
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Data Akun"),
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(6, 5, 6, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         JComboBox<String> cbNewRole = new JComboBox<>(new String[]{"ADMIN", "HRD"});
-        JTextField txtCode = new JTextField();
+        cbNewRole.setFont(cbNewRole.getFont().deriveFont(14f));
+
+        JTextField txtCode = new JTextField(20);
         txtCode.setEditable(false);
-        JTextField txtName = new JTextField();
-        JTextField txtNewUser = new JTextField();
-        JPasswordField txtNewPass = new JPasswordField();
+        txtCode.setFont(txtCode.getFont().deriveFont(14f));
 
-        gridPanel.add(new JLabel("Hak Akses (Role):"));
-        gridPanel.add(cbNewRole);
-        gridPanel.add(new JLabel("Kode (Otomatis):"));
-        gridPanel.add(txtCode);
-        gridPanel.add(new JLabel("Nama Lengkap:"));
-        gridPanel.add(txtName);
-        gridPanel.add(new JLabel("Username:"));
-        gridPanel.add(txtNewUser);
-        gridPanel.add(new JLabel("Password:"));
-        gridPanel.add(txtNewPass);
+        JTextField txtName = new JTextField(20);
+        txtName.setFont(txtName.getFont().deriveFont(14f));
 
-        mainPanel.add(gridPanel, BorderLayout.CENTER);
+        JTextField txtNewUser = new JTextField(20);
+        txtNewUser.setFont(txtNewUser.getFont().deriveFont(14f));
+
+        JPasswordField txtNewPass = new JPasswordField(20);
+        txtNewPass.setFont(txtNewPass.getFont().deriveFont(14f));
+
+        String[] labels = {"Hak Akses (Role):", "Kode (Otomatis):", "Nama Lengkap:", "Username:", "Password:"};
+        JComponent[] fields = {cbNewRole, txtCode, txtName, txtNewUser, txtNewPass};
+
+        for (int i = 0; i < labels.length; i++) {
+            gbc.gridx = 0; gbc.gridy = i; gbc.weightx = 0;
+            JLabel lbl = new JLabel(labels[i]);
+            lbl.setFont(lbl.getFont().deriveFont(Font.PLAIN, 14f));
+            formPanel.add(lbl, gbc);
+
+            gbc.gridx = 1; gbc.gridy = i; gbc.weightx = 1.0;
+            formPanel.add(fields[i], gbc);
+        }
+
+        mainPanel.add(formPanel, BorderLayout.CENTER);
 
         Runnable updateCode = () -> {
             String role = (String) cbNewRole.getSelectedItem();
@@ -140,7 +229,9 @@ public class LoginFrame extends JFrame {
         updateCode.run();
 
         JButton btnSave = new JButton("Daftar Akun");
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        btnSave.setFont(btnSave.getFont().deriveFont(Font.BOLD, 14f));
+        btnSave.setPreferredSize(new Dimension(160, 38));
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
         btnPanel.add(btnSave);
         mainPanel.add(btnPanel, BorderLayout.SOUTH);
 
