@@ -79,6 +79,25 @@ Proyek ini telah dikonfigurasi dengan file proyek NetBeans (`nbproject/` dan `bu
 4. Klik **Open Project**.
 5. Semua file sumber (`src/`) dan dependensi library di folder `lib/` (FlatLaf dan MySQL Connector) akan dimuat secara otomatis. Anda bisa langsung menekan tombol **Run Project (F6)**.
 
+### C. Migrasi Database Manual
+
+Meskipun aplikasi ini memiliki fitur *auto-migrate* dan *auto-seed* yang akan membuat tabel dan memasukkan data sampel secara otomatis saat pertama kali dijalankan, Anda juga dapat menjalankan migrasi secara manual jika diperlukan (misalnya untuk me-reset database):
+
+1. Buka terminal atau command prompt.
+2. Masuk ke MySQL console menggunakan perintah:
+   ```bash
+   mysql -u root -p
+   ```
+3. Jalankan file `schema.sql` untuk membuat struktur database:
+   ```sql
+   source /path/to/AplikasiPengajuanCuti/schema.sql;
+   ```
+4. Jalankan file `seed.sql` untuk memasukkan data sampel:
+   ```sql
+   source /path/to/AplikasiPengajuanCuti/seed.sql;
+   ```
+   *(Pastikan untuk mengganti `/path/to/AplikasiPengajuanCuti/` dengan path absolut menuju folder proyek ini di komputer Anda).*
+
 ---
 
 ## Data Akun Pengguna Bawaan (Default Accounts)
